@@ -19,6 +19,10 @@
   #include <helpers/ui/GenericVibration.h>
 #endif
 
+#ifdef DM_VIBRATION_PIN
+  #include "DirectMessageVibration.h"
+#endif
+
 #include "../AbstractUITask.h"
 #include "../NodePrefs.h"
 
@@ -47,6 +51,9 @@ struct DiscoveredNode {
 #endif
 
 class UITask : public AbstractUITask {
+#ifdef DM_VIBRATION_PIN
+  DirectMessageVibration dm_vibration;
+#endif
   DisplayDriver* _display;
   SensorManager* _sensors;
 #ifdef PIN_BUZZER

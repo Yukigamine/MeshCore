@@ -1,3 +1,11 @@
+## Heltec V3 vibration companion fork
+
+This fork adds GPIO47 vibration alerts: **one pulse for channel messages and two
+for direct messages**, including when the phone is disconnected. GPS remains
+enabled with RX moved to GPIO4 (TX stays GPIO48). See the
+[build, GPIO mapping, flashing and update guide](docs/heltec-v3-vibration.md).
+The known working build is based on official `companion-v1.18.0`.
+
 ## About MeshCore
 
 MeshCore is a lightweight, portable C++ library that enables multi-hop packet routing for embedded projects using LoRa and other packet radios. It is designed for developers who want to create resilient, decentralized communication networks that work without the internet.

@@ -750,6 +750,10 @@ void UITask::begin(DisplayDriver* display, SensorManager* sensors, NodePrefs* no
   vibration.begin();
 #endif
 
+#ifdef DM_VIBRATION_PIN
+  dm_vibration.begin();
+#endif
+
   ui_started_at = millis();
   _alert_expiry = 0;
 
@@ -797,6 +801,11 @@ void UITask::onMessageRecv(mesh::Packet *pkt, const ContactInfo &from, uint8_t t
   // we only want to show text messages on display, not cli data
   if (!(txt_type == TXT_TYPE_PLAIN || txt_type == TXT_TYPE_SIGNED_PLAIN)) return;
 
+#ifdef DM_VIBRATION_PIN
+  // Signed text is also used for room-server posts; alert only on direct text.
+  if (txt_type == TXT_TYPE_PLAIN && from.type != ADV_TYPE_ROOM) dm_vibration.trigger();
+#endif
+
   uint8_t path_len = pkt->isRouteFlood() ? pkt->path_len : 0xFF;
   ((MsgPreviewScreen *) msg_preview)->addPreview(path_len, from.name, text);
   setCurrScreen(msg_preview);
@@ -817,6 +826,9 @@ void UITask::onMessageRecv(mesh::Packet *pkt, const ContactInfo &from, uint8_t t
 }
 
 void UITask::onChannelMessageRecv(mesh::Packet *pkt, ChannelDetails& channel_details, const char* text) {
+#ifdef DM_VIBRATION_PIN
+  dm_vibration.trigger(1);
+#endif
   uint8_t path_len = pkt->isRouteFlood() ? pkt->path_len : 0xFF;
   ((MsgPreviewScreen *) msg_preview)->addPreview(path_len, channel_details.name, text);
   setCurrScreen(msg_preview);
@@ -887,6 +899,9 @@ void UITask::setCurrScreen(UIScreen* c) {
   hardware-agnostic pre-shutdown activity should be done here
 */
 void UITask::shutdown(bool restart){
+#ifdef DM_VIBRATION_PIN
+  dm_vibration.stop();
+#endif
 
   #ifdef PIN_BUZZER
   /* note: we have a choice here -
@@ -1057,6 +1072,9 @@ void UITask::loop() {
 
 #ifdef PIN_VIBRATION
   vibration.loop();
+#endif
+#ifdef DM_VIBRATION_PIN
+  dm_vibration.loop();
 #endif
 
 #ifdef AUTO_SHUTDOWN_MILLIVOLTS

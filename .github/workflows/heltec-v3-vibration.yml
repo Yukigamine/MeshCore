@@ -1,0 +1,33 @@
+name: Build Heltec V3 vibration
+
+on:
+  push:
+    branches: [heltec-v3-vibration]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Install PlatformIO
+        run: python -m pip install platformio==6.1.19
+      - name: Test vibration timing
+        run: |
+          c++ -std=c++11 -I extras/heltec_v3_vibration/test -I examples/companion_radio/ui-new extras/heltec_v3_vibration/test/vibration.cpp -o /tmp/meshcore-vibration-test
+          /tmp/meshcore-vibration-test
+      - name: Build firmware
+        run: pio run -e Heltec_v3_companion_radio_ble_dm_vibration -t mergebin
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Heltec-v3-vibration-${{ github.sha }}
+          path: |
+            .pio/build/Heltec_v3_companion_radio_ble_dm_vibration/firmware.bin
+            .pio/build/Heltec_v3_companion_radio_ble_dm_vibration/firmware-merged.bin
+          if-no-files-found: error
